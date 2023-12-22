@@ -10,7 +10,7 @@ _See README for info about data and list of tasks_.
 
 # 1. Data Visualization and Hypothesis Formulation {#sec1}
 
-We start off by loading the sample data and summarizing it:
+We start off by loading the sample data with the repair times of Atlas Telecommunications and summarizing it:
 ```{r}
 atlas <- read.csv(file = "../data/atlascom.csv")
 
@@ -19,9 +19,38 @@ summary(atlas)
 ```
 
 We know that we are dealing with a dataframe containing two variables:
+
 * a _Time_ variable, which indicates the repair times,
 * a _Group_ variable, which indicates the carrier type; it can be either CLEC or ILEC, but since Verizon is an ILEC, all the entries correspond to ILEC indeed (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
 
 There are 1664 data entries, the mean value is 8.412 minutes, while the median time is 3.59 minutes.
 
-# UPDATED README and STARTED Task 1
+## Visualize the distribution of Atlas' repair times, marking the mean with a vertical line
+
+Let's see how are the repair times of Atlas telecommunications distributed:
+```{r atlas density, fig.align='center'}
+# Considering only the Time variable
+time <- atlas$Time
+
+plot(density(time), main = "Atlas Repair Times", lwd = 2, col = "tomato")
+abline(v = mean(time), lty = "dashed")
+```
+
+The plot shows that most of the repair times are contained within 10 minutes or so, however, there are some scenarios in which the repair times increase to roughly 3 hours.
+
+## Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time
+
+Given that the New York PUC would like to check for any deviations from Atlas' claim regarding the average repair time, we would suppose a *two-tailed scenario*, where the null hypothesis states that the average repair time equals 7.6 minutes, and the alternative hypothesis states that the average repair time is different from 7.6 minutes. Hence:
+
+<div align = 'center'>
+  ![](https://latex.codecogs.com/gif.latex?H_0%3A%20%5Cmu%3D7.6)
+</div>
+<div align = 'center'>
+  ![](https://latex.codecogs.com/gif.latex?H_a%3A%20%5Cmu%5Cneq%207.6)
+</div>
+
+<br>
+
+# 2. Hypothesis Testing
+
+## Calculate the estimated population mean and construct a 99% confidence interval for it
