@@ -1,0 +1,27 @@
+---
+title: "Atlas Telecommunications Service Quality Analysis"
+output: github_document
+---
+
+**Author:** Daniele Melotti<br>
+**Date:** Dec 2023
+
+_See README for info about data and list of tasks_.
+
+# 1. Data Visualization and Hypothesis Formulation {#sec1}
+
+We start off by loading the sample data and summarizing it:
+```{r}
+atlas <- read.csv(file = "../data/atlascom.csv")
+
+str(atlas)
+summary(atlas)
+```
+
+We know that we are dealing with a dataframe containing two variables:
+* a _Time_ variable, which indicates the repair times,
+* a _Group_ variable, which indicates the carrier type; it can be either CLEC or ILEC, but since Verizon is an ILEC, all the entries correspond to ILEC indeed (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
+
+There are 1664 data entries, the mean value is 8.412 minutes, while the median time is 3.59 minutes.
+
+# UPDATED README and STARTED Task 1

@@ -5,3 +5,24 @@ The primary goal of this project is to analyze the service quality of *Atlas Com
 The dataset consists of a recent sample of repair times collected by the New York PUC. It records the time taken by Atlas Communications to repair phone services for each customer in the sample.
 
 # Tasks
+
+## 1. Data Visualization and Hypothesis Formulation
+* Visualize the distribution of Atlas' repair times, marking the mean with a vertical line.
+* Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time.
+
+## 2. Hypothesis Testing
+* Calculate the estimated population mean and construct a 99% confidence interval for it.
+* Perform a t-test to find the t-statistic and p-value, assessing the validity of Atlas' repair time claim.
+* Interpret the results.
+
+## 3. Bootstrap Analysis
+* Estimate the bootstrapped 99% confidence interval of the average repair time.
+* Calculate the 99% confidence interval of the difference between the population mean and the hypothesized mean using bootstrapping.
+* Determine the 99% confidence interval of the bootstrapped t-statistic.
+* Plot the distribution for each of the bootstrapped analyses.
+
+## 4. Comments and Implications
+* Do the four methods agree with each other on the test?
+* Implications
+
+
