@@ -3,14 +3,14 @@ title: "Atlas Telecommunications Service Quality Analysis"
 output: github_document
 ---
 
-**Author:** Daniele Melotti<br>
-**Date:** Dec 2023
+**Author:** Daniele Melotti<br> **Date:** Dec 2023
 
-_See README for info about data and list of tasks_.
+*See README for info about data and list of tasks*.
 
 # 1. Data Visualization and Hypothesis Formulation {#sec1}
 
 We start off by loading the sample data with the repair times of Atlas Telecommunications and summarizing it:
+
 ```{r}
 atlas <- read.csv(file = "../data/atlascom.csv")
 
@@ -20,14 +20,15 @@ summary(atlas)
 
 We know that we are dealing with a dataframe containing two variables:
 
-* a _Time_ variable, which indicates the repair times,
-* a _Group_ variable, which indicates the carrier type; it can be either CLEC or ILEC, but since Verizon is an ILEC, all the entries correspond to ILEC indeed (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
+-   a *Time* variable, which indicates the repair times,
+-   a *Group* variable, which indicates the carrier type; it can be either CLEC or ILEC (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
 
-There are 1664 data entries, the mean value is 8.412 minutes, while the median time is 3.59 minutes.
+There are 1664 data entries, the mean value is 8.522 minutes, while the median time is 3.63 minutes.
 
 ## Visualize the distribution of Atlas' repair times, marking the mean with a vertical line
 
-Let's see how are the repair times of Atlas telecommunications distributed:
+Let's see how the repair times of Atlas telecommunications are distributed:
+
 ```{r atlas density, fig.align='center'}
 # Considering only the Time variable
 time <- atlas$Time
@@ -36,21 +37,70 @@ plot(density(time), main = "Atlas Repair Times", lwd = 2, col = "tomato")
 abline(v = mean(time), lty = "dashed")
 ```
 
-The plot shows that most of the repair times are contained within 10 minutes or so, however, there are some scenarios in which the repair times increase to roughly 3 hours.
+The plot shows that most of the repair times are contained within 10 minutes or so, however, there are some scenarios in which the repair times increase even up to 3 hours.
 
-## Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time
+## PUC checks: Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time
 
-Given that the New York PUC would like to check for any deviations from Atlas' claim regarding the average repair time, we would suppose a *two-tailed scenario*, where the null hypothesis states that the average repair time equals 7.6 minutes, and the alternative hypothesis states that the average repair time is different from 7.6 minutes. Hence:
+Given that the New York Public Utilities Commission (PUC) would like to check for any deviations from Atlas' claim regarding the average repair time, we suppose a *two-tailed scenario*, where the null hypothesis states that the average repair time equals 7.6 minutes, and the alternative hypothesis states that the average repair time is different from 7.6 minutes. Hence:
 
-<div align = 'center'>
-  ![](https://latex.codecogs.com/gif.latex?H_0%3A%20%5Cmu%3D7.6)
-</div>
-<div align = 'center'>
-  ![](https://latex.codecogs.com/gif.latex?H_a%3A%20%5Cmu%5Cneq%207.6)
-</div>
+::: {align="center"}
+![](https://latex.codecogs.com/gif.latex?H_0%3A%20%5Cmu%3D7.6)
+:::
+
+::: {align="center"}
+![](https://latex.codecogs.com/gif.latex?H_a%3A%20%5Cmu%5Cneq%207.6)
+:::
 
 <br>
 
 # 2. Hypothesis Testing
 
 ## Calculate the estimated population mean and construct a 99% confidence interval for it
+
+Earlier we saw that the population mean is 8.522 minutes. We can use this estimate to build a confidence interval:
+
+```{r}
+# Computing mean, standard deviation and standard error
+mean_time <- mean(time)
+sd_time <- sd(time)
+se <- sd_time/sqrt(length(time))
+
+# 99% CI
+mean_time + c(-2.58, 2.58) * se
+```
+
+The interval indicates that we can be 99% confident that the mean repair time lays between 7.59 and 9.45 minutes.
+
+## Perform a t-test to find the t-statistic and p-value, assessing the validity of Atlas' repair time claim.
+
+The t-test is a perfect instrument for evaluating whether there is a significant difference between Atlas' claimed repair time and the actual computed mean. A t-statistic is calculated by subtracting the null hypothesis' mean from the alternative hypothesis' mean, and then dividing the result by the standard error:
+
+::: {align="center"}
+![](https://latex.codecogs.com/gif.latex?t_%7Bstat%7D%3D%5Cfrac%7B%5Cmu_A-%5Cmu_0%7D%7Bse%7D)
+:::
+
+Let's calculate it on our own:
+
+```{r}
+# Null hypothesis' mean 
+mu_0 <- 7.6
+
+# Computing the t-statistic
+t_stat <- (mean_time - mu_0)/se
+t_stat
+```
+
+We found a t-statistic equal to 2.56. Let's also compute the t-statistic's p-value:
+
+```{r}
+# Computing the degrees of freedom
+df <- length(time) - 1
+
+# Computing the p-value
+p_value <- 1 - pt(t_stat, df)
+p_value
+```
+
+The t-statistic is the ratio of departure of the estimated value of the mean from its hypothesized value to its standard error. If the t-statistic falls out of the 99% CI range (-2.58, 2.58; 3 standard deviations to the left of the mean, and 3 standard deviations to the right) there is a likelihood that the null distribution of t (which is centered on 0) is not the proper distribution for our data. Then, we'd have to consider the alternative distribution, which shares the same shape with the null distribution. Our t-statistic (2.56) is on the border of the 3-standard deviations interval, (-2.58, 2.58).
+
+As the number of degrees of freedom is large, we can approximate the t-distribution with a normal distribution. The p-value helps us determine whether or not the t-statistic is statistically significant. In our scenario, we are conducting a two-tailed test, which means that the critical p-value must be halved (it becomes 0.005 for a 99% confidence case). We saw that our p-value was 0.0053, hence slightly bigger than the critical p-value, which according to theory means that **we cannot reject the null hypothesis**, leaving us with a borderline case. That would mean that the claimed repair time of Atlas is true if we consider a 99% confidence, but given the borderline scenario we encountered, this conclusion is debatable and shall be taken with a pinch of salt.

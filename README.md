@@ -8,7 +8,7 @@ The dataset consists of a recent sample of repair times collected by the New Yor
 
 ## 1. Data Visualization and Hypothesis Formulation
 * Visualize the distribution of Atlas' repair times, marking the mean with a vertical line.
-* Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time.
+* PUC checks: Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time.
 
 ## 2. Hypothesis Testing
 * Calculate the estimated population mean and construct a 99% confidence interval for it.
