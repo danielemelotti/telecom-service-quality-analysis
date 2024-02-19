@@ -16,13 +16,13 @@ The dataset consists of a recent sample of repair times collected by the New Yor
 * Interpret the results.
 
 ## 3. Bootstrap Analysis
-* Estimate the bootstrapped 99% confidence interval of the average repair time.
-* Calculate the 99% confidence interval of the difference between the population mean and the hypothesized mean using bootstrapping.
-* Determine the 99% confidence interval of the bootstrapped t-statistic.
+* Bootstrapped Percentile: Estimate the 99% confidence interval of the average repair time
+* Bootstrapped Difference of Means: Calculate the 99% confidence interval of the difference between the population mean and the hypothesized mean.
+* Bootstrapped t-interval: Determine the 99% confidence interval of the bootstrapped t-statistic.
 * Plot the distribution for each of the bootstrapped analyses.
 
 ## 4. Comments and Implications
-* Do the four methods agree with each other on the test?
+* Do the t-test and the bootstrapping methods agree with each other on the outcome?
 * Implications
 
 

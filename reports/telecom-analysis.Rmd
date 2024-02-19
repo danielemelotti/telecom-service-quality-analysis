@@ -25,12 +25,12 @@ We know that we are dealing with a dataframe containing two variables:
 
 There are 1664 data entries, the mean value is 8.522 minutes, while the median time is 3.63 minutes.
 
-## Visualize the distribution of Atlas' repair times, marking the mean with a vertical line
+## Visualize the distribution of Atlas' repair times, marking the mean with a vertical line {#sec1a}
 
 Let's see how the repair times of Atlas telecommunications are distributed:
 
 ```{r atlas density, fig.align='center'}
-# Considering only the Time variable
+# Taking into account only the Time variable
 time <- atlas$Time
 
 plot(density(time), main = "Atlas Repair Times", lwd = 2, col = "tomato")
@@ -39,9 +39,9 @@ abline(v = mean(time), lty = "dashed")
 
 The plot shows that most of the repair times are contained within 10 minutes or so, however, there are some scenarios in which the repair times increase even up to 3 hours.
 
-## PUC checks: Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time
+## PUC checks: Formulate the null and alternative hypotheses for testing Atlas' claim about their average repair time {#sec1b}
 
-Given that the New York Public Utilities Commission (PUC) would like to check for any deviations from Atlas' claim regarding the average repair time, we suppose a *two-tailed scenario*, where the null hypothesis states that the average repair time equals 7.6 minutes, and the alternative hypothesis states that the average repair time is different from 7.6 minutes. Hence:
+Let's suppose that Atlas claims that it takes an average 7.6 minutes to repair phone services its customers. Given that the New York Public Utilities Commission (PUC) would like to check for any deviations from such claim, we suppose a *two-tailed scenario*, where the null hypothesis states that the average repair time equals 7.6 minutes, and the alternative hypothesis states that the average repair time is different from 7.6 minutes. Hence:
 
 ::: {align="center"}
 ![](https://latex.codecogs.com/gif.latex?H_0%3A%20%5Cmu%3D7.6)
@@ -53,9 +53,9 @@ Given that the New York Public Utilities Commission (PUC) would like to check fo
 
 <br>
 
-# 2. Hypothesis Testing
+# 2. Hypothesis Testing {#sec2}
 
-## Calculate the estimated population mean and construct a 99% confidence interval for it
+## Calculate the estimated population mean and construct a 99% confidence interval for it {#sec2a}
 
 Earlier we saw that the population mean is 8.522 minutes. We can use this estimate to build a confidence interval:
 
@@ -69,9 +69,9 @@ se <- sd_time/sqrt(length(time))
 mean_time + c(-2.58, 2.58) * se
 ```
 
-The interval indicates that we can be 99% confident that the mean repair time lays between 7.59 and 9.45 minutes.
+The interval indicates that we can be 99% confident that the mean repair time lays between 7.59 and 9.45 minutes. This interval barely includes the mean repair time of our null hypothesis.
 
-## Perform a t-test to find the t-statistic and p-value, assessing the validity of Atlas' repair time claim.
+## Perform a t-test to find the t-statistic and p-value, assessing the validity of Atlas' repair time claim {#sec2b}
 
 The t-test is a perfect instrument for evaluating whether there is a significant difference between Atlas' claimed repair time and the actual computed mean. A t-statistic is calculated by subtracting the null hypothesis' mean from the alternative hypothesis' mean, and then dividing the result by the standard error:
 
@@ -101,6 +101,58 @@ p_value <- 1 - pt(t_stat, df)
 p_value
 ```
 
-The t-statistic is the ratio of departure of the estimated value of the mean from its hypothesized value to its standard error. If the t-statistic falls out of the 99% CI range (-2.58, 2.58; 3 standard deviations to the left of the mean, and 3 standard deviations to the right) there is a likelihood that the null distribution of t (which is centered on 0) is not the proper distribution for our data. Then, we'd have to consider the alternative distribution, which shares the same shape with the null distribution. Our t-statistic (2.56) is on the border of the 3-standard deviations interval, (-2.58, 2.58).
+## Interpret the result {#sec2c}
+
+The t-statistic is the ratio of departure of the estimated value of the mean from its hypothesized value to its standard error. If the t-statistic falls out of the 99% CI range (-2.58, 2.58; 3 standard deviations to the left of the mean, and 3 standard deviations to the right) there is a likelihood that the null distribution of t (which is centered on 0) is not the proper distribution for our data. Then, we'd have to consider the alternative distribution, which shares the same shape with the null distribution. Our t-statistic (2.56) is basically on the left boundary of the 3-standard deviations interval, (-2.58, 2.58).
 
 As the number of degrees of freedom is large, we can approximate the t-distribution with a normal distribution. The p-value helps us determine whether or not the t-statistic is statistically significant. In our scenario, we are conducting a two-tailed test, which means that the critical p-value must be halved (it becomes 0.005 for a 99% confidence case). We saw that our p-value was 0.0053, hence slightly bigger than the critical p-value, which according to theory means that **we cannot reject the null hypothesis**, leaving us with a borderline case. That would mean that the claimed repair time of Atlas is true if we consider a 99% confidence, but given the borderline scenario we encountered, this conclusion is debatable and shall be taken with a pinch of salt.
+
+# 3. Bootstrap Analysis {#sec3}
+
+We have performed a traditional t-test which left us with a non-rejection. Now, we are going to employ bootstrapping on three statistics (percentile, difference of means, t-interval) and see whether all methods share the same outcome as the traditional t-test.
+
+## Bootstrapped Percentile: Estimate the 99% confidence interval of the average repair time {#sec3a}
+
+We start off with the bootstrapped percentile. We create a function that takes a sample of the original data with replacement and calculates the mean of the sample. Then, we use `replicate()` to repeat this process 2000 times, which grants us with 2000 means and allows us to compute a 99% confidence interval of the mean:
+
+```{r}
+# 2000 bootstraps
+boots <- 2000
+
+# Bootstrapped percentiles function
+compute_sample_mean <- function(sample0) {
+  resample <- sample(sample0, length(sample0), replace = TRUE)
+  mean(resample)
+}
+
+# Setting seed
+set.seed(150)
+
+# Computing the 99% CI of the mean
+boot_99 <- replicate(boots, compute_sample_mean(time))
+perc_99_CI <- quantile(boot_99, probs = c(0.025, 0.995))
+perc_99_CI
+```
+
+The interval above **does not include the hypothesized average repair time**, which means that we can reject the null hypothesis and point out that the average repair time is different from 7.6 minutes. Let's see if the next methods lead to the same conclusion.
+
+## Bootstrapped Difference of Means: Calculate the 99% confidence interval of the difference between the population mean and the hypothesized mean {#sec3b}
+
+For the difference of means, we create a function with a similar structure to the one in the section above; however, instead of computing the mean, we subtract the hypothesized mean of 7.6 minutes from the bootstrapped mean. Then, we use `replicate()` to repeat the process 2000 times and compute a 99% confidence interval of the differences:
+
+```{r}
+# Bootstrapped differences function
+boot_mean_diffs <- function(sample0, mean_hyp) {
+  resample <- sample(sample0, length(sample0), replace = TRUE)
+  return(mean(resample) - mean_hyp)
+}
+
+# Setting seed
+set.seed(350)
+
+mean_diffs <- replicate(boots, boot_mean_diffs(time, mu_0))
+diff_99_CI <- quantile(mean_diffs, probs = c(0.005, 0.995))
+diff_99_CI # 0 is not included!
+```
+
+As **zero is not included in the interval**, we can reject the null hypothesis and say that the average repair time is different from 7.6 minutes.
