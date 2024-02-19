@@ -20,8 +20,8 @@ summary(atlas)
 
 We know that we are dealing with a dataframe containing two variables:
 
--   a *Time* variable, which indicates the repair times,
--   a *Group* variable, which indicates the carrier type; it can be either CLEC or ILEC (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
+- a *Time* variable, which indicates the repair times,
+- a *Group* variable, which indicates the carrier type; it can be either CLEC or ILEC (see [this link](https://www.tutorialspoint.com/difference-between-ilec-and-clec) for differences between CLEC and ILEC).
 
 There are 1664 data entries, the mean value is 8.522 minutes, while the median time is 3.63 minutes.
 
@@ -195,7 +195,7 @@ abline(v = mu_0, lwd = 1.5, lty = "dashed", col = "bisque4") # 7.6 minutes claim
 
 The plot confirms how the claimed average repair time is out of the 99% confidence interval built from the bootstrapped means.
 
-```{r boot means, fig.align='center'}
+```{r boot diffs, fig.align='center'}
 plot(density(mean_diffs), main = "Bootstrapped Difference of Means", ylab = "", xlab = "Minutes")
 abline(v = mean(mean_diffs), lwd = 1.5, col = "tomato") # mean
 abline(v = diff_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
@@ -204,7 +204,7 @@ abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
 
 Similarly, zero is not included in the 99% confidence interval of the bootstrapped difference of means.
 
-```{r boot means, fig.align='center'}
+```{r boot t stats, fig.align='center'}
 plot(density(t_boots), main = "Bootstrapped t-statistics", ylab = "", xlab = "Minutes")
 abline(v = mean(t_boots), lwd = 1.5, col = "tomato") # mean of bootstrapped t-statistics
 abline(v = t_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
@@ -212,3 +212,21 @@ abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
 ```
 
 And finally, the last visualization also shows that zero is (barely) not included in the confidence interval generated from bootstrapped t-statistics.
+
+# 4. Comments and Implications {#sec4}
+
+## Do the t-test and the bootstrapping methods agree with each other on the outcome? {#sec4a}
+
+The traditional t-test leads to the conclusion that we cannot reject the null hypothesis. According to the three  bootstrap analyses, we can reject the null hypothesis and conclude that the mean repair time of Atlas is not equal
+to 7.6 minutes, even though it's worth nothing that the results might have been lightly affected by the seed choice.
+
+## Implications {#sec4b}
+
+The comprehensive analysis of Atlas Telecommunications' service repair times, encompassing both traditional statistical tests and advanced bootstrapping methodologies, provides a nuanced understanding of the company's performance against its claims. While the t-test and bootstrapped t-statistic present borderline results, indicating a close call in directly supporting or refuting Atlas' claims, the bootstrapped analyses of means and difference of means offer a more decisive stance on rejecting the null hypothesis. This suggests that, statistically, Atlas' actual repair times may not align with its advertised performance.
+
+Considering bootstrap, each analysis we ran showed that the statistics of interest always stood somewhere on the left tail of the distributions, meaning that the bootstrapped means, difference of means and t-statistics are actually larger than the real ones. Hence it looks like Atlas' repair times are higher than 7.6 on average. The company should consider the following:
+
+- Evaluate and enhance its service protocols and operational efficiency to better meet its service standards and customer expectations.
+- Attempt to identify bottlenecks or inefficiencies contributing to extended repair times.
+- Research about the factors influencing repair time variability.
+- Engage with stakeholders to discuss the findings of the actions mentioned above and propose improvements.
