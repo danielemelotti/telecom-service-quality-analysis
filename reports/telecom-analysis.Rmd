@@ -109,17 +109,17 @@ As the number of degrees of freedom is large, we can approximate the t-distribut
 
 # 3. Bootstrap Analysis {#sec3}
 
-We have performed a traditional t-test which left us with a non-rejection. Now, we are going to employ bootstrapping on three statistics (percentile, difference of means, t-interval) and see whether all methods share the same outcome as the traditional t-test.
+We have performed a traditional t-test which left us with a non-rejection. Now, we are going to employ bootstrapping on three statistics (means, difference of means, t-interval) and see whether all methods share the same outcome as the traditional t-test.
 
-## Bootstrapped Percentile: Estimate the 99% confidence interval of the average repair time {#sec3a}
+## Bootstrapped Means: Estimate the 99% confidence interval of the average repair time {#sec3a}
 
-We start off with the bootstrapped percentile. We create a function that takes a sample of the original data with replacement and calculates the mean of the sample. Then, we use `replicate()` to repeat this process 2000 times, which grants us with 2000 means and allows us to compute a 99% confidence interval of the mean:
+We start off with the bootstrapped means We create a function that takes a sample of the original data with replacement and calculates the mean of the sample. Then, we use `replicate()` to repeat this process 2000 times, which grants us with 2000 means and allows us to compute a 99% confidence interval of the mean:
 
 ```{r}
 # 2000 bootstraps
 boots <- 2000
 
-# Bootstrapped percentiles function
+# Bootstrapped means function
 compute_sample_mean <- function(sample0) {
   resample <- sample(sample0, length(sample0), replace = TRUE)
   mean(resample)
@@ -150,9 +150,65 @@ boot_mean_diffs <- function(sample0, mean_hyp) {
 # Setting seed
 set.seed(350)
 
+# Computing the 99% CI of the differences
 mean_diffs <- replicate(boots, boot_mean_diffs(time, mu_0))
 diff_99_CI <- quantile(mean_diffs, probs = c(0.005, 0.995))
-diff_99_CI # 0 is not included!
+diff_99_CI
 ```
 
 As **zero is not included in the interval**, we can reject the null hypothesis and say that the average repair time is different from 7.6 minutes.
+
+## Bootstrapped t-interval: Determine the 99% confidence interval of the bootstrapped t-statistic {#sec3d}
+
+Our last bootstrap sees the computation of multiple t-statistics after the data is resampled. Again, we bootstrap 2000 times. The `boot_t_stat()` function takes care of resampling the data, computing the difference between the computed mean from the resampled data and hypothesized mean, computing standard error and finally the t-statistic:
+
+```{r}
+# Bootstrapped t-stat function
+boot_t_stat <- function(sample0, mean_hyp) {
+  resample <- sample(sample0, length(sample0), replace = TRUE)
+  diff <- mean(resample) - mean_hyp
+  se <- sd(resample)/sqrt(length(resample))
+  return(diff/se)
+}
+
+# Setting seed
+set.seed(450)
+
+# Computing the 99% CI of the t-statistics
+t_boots <- replicate(boots, boot_t_stat(time, mu_0))
+t_99_CI <- quantile(t_boots, probs = c(0.005, 0.995))
+t_99_CI
+```
+
+Even in this case, **zero is not included in the interval**, which means that we can reject the null hypothesis and say that the average repair time is different from 7.6 minutes.
+
+## Plot the distribution for each of the bootstrapped analyses
+
+Let's build visualizations for the three bootstrapped analyses we just ran:
+
+```{r boot means, fig.align='center'}
+plot(density(boot_99), main = "Bootstrapped Means", ylab = "", xlab = "Minutes")
+abline(v = mean(boot_99), lwd = 1.5, col = "tomato") # mean of bootstrapped means
+abline(v = perc_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
+abline(v = mu_0, lwd = 1.5, lty = "dashed", col = "bisque4") # 7.6 minutes claim
+```
+
+The plot confirms how the claimed average repair time is out of the 99% confidence interval built from the bootstrapped means.
+
+```{r boot means, fig.align='center'}
+plot(density(mean_diffs), main = "Bootstrapped Difference of Means", ylab = "", xlab = "Minutes")
+abline(v = mean(mean_diffs), lwd = 1.5, col = "tomato") # mean
+abline(v = diff_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
+abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
+```
+
+Similarly, zero is not included in the 99% confidence interval of the bootstrapped difference of means.
+
+```{r boot means, fig.align='center'}
+plot(density(t_boots), main = "Bootstrapped t-statistics", ylab = "", xlab = "Minutes")
+abline(v = mean(t_boots), lwd = 1.5, col = "tomato") # mean of bootstrapped t-statistics
+abline(v = t_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
+abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
+```
+
+And finally, the last visualization also shows that zero is (barely) not included in the confidence interval generated from bootstrapped t-statistics.

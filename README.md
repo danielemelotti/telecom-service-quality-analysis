@@ -16,7 +16,7 @@ The dataset consists of a recent sample of repair times collected by the New Yor
 * Interpret the results.
 
 ## 3. Bootstrap Analysis
-* Bootstrapped Percentile: Estimate the 99% confidence interval of the average repair time
+* Bootstrapped Means: Estimate the 99% confidence interval of the average repair time
 * Bootstrapped Difference of Means: Calculate the 99% confidence interval of the difference between the population mean and the hypothesized mean.
 * Bootstrapped t-interval: Determine the 99% confidence interval of the bootstrapped t-statistic.
 * Plot the distribution for each of the bootstrapped analyses.
