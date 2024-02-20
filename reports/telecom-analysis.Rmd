@@ -3,9 +3,9 @@ title: "Atlas Telecommunications Service Quality Analysis"
 output: github_document
 ---
 
-**Author:** Daniele Melotti<br> **Date:** Dec 2023
+**Author:** Daniele Melotti<br> **Date:** Feb 2024
 
-*See README for info about data and list of tasks*.
+_See README for info about data and list of tasks_.
 
 # 1. Data Visualization and Hypothesis Formulation {#sec1}
 
@@ -73,7 +73,7 @@ The interval indicates that we can be 99% confident that the mean repair time la
 
 ## Perform a t-test to find the t-statistic and p-value, assessing the validity of Atlas' repair time claim {#sec2b}
 
-The t-test is a perfect instrument for evaluating whether there is a significant difference between Atlas' claimed repair time and the actual computed mean. A t-statistic is calculated by subtracting the null hypothesis' mean from the alternative hypothesis' mean, and then dividing the result by the standard error:
+The t-test is a perfect instrument for evaluating whether there is a significant difference between Atlas' claimed repair time and the actual computed mean. A t-statistic is calculated by subtracting the null hypothesis' mean from the actual computed mean, and then dividing the result by the standard error:
 
 ::: {align="center"}
 ![](https://latex.codecogs.com/gif.latex?t_%7Bstat%7D%3D%5Cfrac%7B%5Cmu_A-%5Cmu_0%7D%7Bse%7D)
@@ -113,7 +113,7 @@ We have performed a traditional t-test which left us with a non-rejection. Now, 
 
 ## Bootstrapped Means: Estimate the 99% confidence interval of the average repair time {#sec3a}
 
-We start off with the bootstrapped means We create a function that takes a sample of the original data with replacement and calculates the mean of the sample. Then, we use `replicate()` to repeat this process 2000 times, which grants us with 2000 means and allows us to compute a 99% confidence interval of the mean:
+We start off with the bootstrapped means. We create a function that takes a sample of the original data with replacement and calculates the mean of the sample. Then, we use `replicate()` to repeat this process 2000 times, which grants us with 2000 means and allows us to compute a 99% confidence interval of the mean:
 
 ```{r}
 # 2000 bootstraps
@@ -156,7 +156,7 @@ diff_99_CI <- quantile(mean_diffs, probs = c(0.005, 0.995))
 diff_99_CI
 ```
 
-As **zero is not included in the interval**, we can reject the null hypothesis and say that the average repair time is different from 7.6 minutes.
+As **zero is not included in the interval**, we can reject the null hypothesis and say that the average repair time is different from 7.6 minutes. Indeed, if the claimed repair time was actual, there would not be a significant difference between that time and the boostrapped means (hence the difference would have been much closer to zero, and the interval would have likely contained zero).
 
 ## Bootstrapped t-interval: Determine the 99% confidence interval of the bootstrapped t-statistic {#sec3d}
 
@@ -187,28 +187,31 @@ Even in this case, **zero is not included in the interval**, which means that we
 Let's build visualizations for the three bootstrapped analyses we just ran:
 
 ```{r boot means, fig.align='center'}
+# Bootstrapped means
 plot(density(boot_99), main = "Bootstrapped Means", ylab = "", xlab = "Minutes")
 abline(v = mean(boot_99), lwd = 1.5, col = "tomato") # mean of bootstrapped means
 abline(v = perc_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
-abline(v = mu_0, lwd = 1.5, lty = "dashed", col = "bisque4") # 7.6 minutes claim
+abline(v = mu_0, lwd = 1.5, lty = "dashed", col = "purple") # 7.6 minutes claim
 ```
 
 The plot confirms how the claimed average repair time is out of the 99% confidence interval built from the bootstrapped means.
 
 ```{r boot diffs, fig.align='center'}
+# Bootstrapped difference of means
 plot(density(mean_diffs), main = "Bootstrapped Difference of Means", ylab = "", xlab = "Minutes")
 abline(v = mean(mean_diffs), lwd = 1.5, col = "tomato") # mean
 abline(v = diff_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
-abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
+abline(v = 0, lwd = 1.5, lty = "dashed", col = "purple") # zero
 ```
 
 Similarly, zero is not included in the 99% confidence interval of the bootstrapped difference of means.
 
 ```{r boot t stats, fig.align='center'}
+# Bootstrapped t-statistics
 plot(density(t_boots), main = "Bootstrapped t-statistics", ylab = "", xlab = "Minutes")
 abline(v = mean(t_boots), lwd = 1.5, col = "tomato") # mean of bootstrapped t-statistics
 abline(v = t_99_CI, lwd = 1.5, col = "cornflowerblue") # confidence interval boundaries
-abline(v = 0, lwd = 1.5, lty = "dashed", col = "bisque4") # zero
+abline(v = 0, lwd = 1.5, lty = "dashed", col = "purple") # zero
 ```
 
 And finally, the last visualization also shows that zero is (barely) not included in the confidence interval generated from bootstrapped t-statistics.
@@ -218,13 +221,13 @@ And finally, the last visualization also shows that zero is (barely) not include
 ## Do the t-test and the bootstrapping methods agree with each other on the outcome? {#sec4a}
 
 The traditional t-test leads to the conclusion that we cannot reject the null hypothesis. According to the three  bootstrap analyses, we can reject the null hypothesis and conclude that the mean repair time of Atlas is not equal
-to 7.6 minutes, even though it's worth nothing that the results might have been lightly affected by the seed choice.
+to 7.6 minutes, even though it's worth noting that the results might have been lightly affected by the seed choice.
 
 ## Implications {#sec4b}
 
-The comprehensive analysis of Atlas Telecommunications' service repair times, encompassing both traditional statistical tests and advanced bootstrapping methodologies, provides a nuanced understanding of the company's performance against its claims. While the t-test and bootstrapped t-statistic present borderline results, indicating a close call in directly supporting or refuting Atlas' claims, the bootstrapped analyses of means and difference of means offer a more decisive stance on rejecting the null hypothesis. This suggests that, statistically, Atlas' actual repair times may not align with its advertised performance.
+The comprehensive analysis of Atlas Telecommunications' service repair times, encompassing both traditional statistical tests and advanced bootstrapping methodologies, provides a nuanced understanding of the company's performance against its claims. While the t-test and bootstrapped t-statistic present borderline results, indicating a close call in directly supporting or refuting Atlas' claims, the bootstrapped analyses of means and difference of means offer a more decisive stance on rejecting the null hypothesis. This suggests that, statistically, Atlas' actual repair times may not align with its claimed performance.
 
-Considering bootstrap, each analysis we ran showed that the statistics of interest always stood somewhere on the left tail of the distributions, meaning that the bootstrapped means, difference of means and t-statistics are actually larger than the real ones. Hence it looks like Atlas' repair times are higher than 7.6 on average. The company should consider the following:
+Considering bootstrap, each analysis we ran showed that the critical value of interest always stood somewhere on the left tail of the distributions, which means that Atlas' repair times are likely higher than the claimed 7.6 minutes on average. The company should consider the following:
 
 - Evaluate and enhance its service protocols and operational efficiency to better meet its service standards and customer expectations.
 - Attempt to identify bottlenecks or inefficiencies contributing to extended repair times.
